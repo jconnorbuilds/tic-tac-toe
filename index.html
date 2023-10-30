@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="tic-tac-toe!" />
+    <script src="ttt.js" defer></script>
+    <link rel="stylesheet" href="reset.css" />
+    <link rel="stylesheet" href="styles.css" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div class="container">
+      <div class="game-messages">
+        <p>Please enter your names and click "Ready!"</p>
+      </div>
+
+      <div class="container-left">
+        <div class="player player1">
+          <h2 class="player-name">Player 1</h2>
+          <p>
+            <label for="p1-name">Name: </label>
+            <input class="name" id="p1-name" type="text" />
+          </p>
+          <button class="ready p1-ready" disabled>Ready!</button>
+          <p class="ready-message"></p>
+        </div>
+        <div class="p1 is-ready hidden">
+          <h2>I'm ready!</h2>
+        </div>
+      </div>
+      <div class="container-middle board-wrapper">
+        <div class="gameboard">
+          <div class="space" data-space="0"></div>
+          <div class="space" data-space="1"></div>
+          <div class="space" data-space="2"></div>
+          <div class="space" data-space="3"></div>
+          <div class="space" data-space="4"></div>
+          <div class="space" data-space="5"></div>
+          <div class="space" data-space="6"></div>
+          <div class="space" data-space="7"></div>
+          <div class="space" data-space="8"></div>
+        </div>
+      </div>
+      <div class="container-right">
+        <div class="player player2">
+          <h2 class="player-name">Player 2</h2>
+          <p>
+            <label for="p2-name">Name: </label>
+            <input class="name" id="p2-name" type="text" />
+          </p>
+          <button class="ready p2-ready" disabled>Ready!</button>
+          <p class="ready-message"></p>
+        </div>
+        <div class="p2 is-ready hidden">
+          <h2>I'm ready!</h2>
+        </div>
+      </div>
+
+      <div class="under-board">
+        <button class="reset-btn">Start over</button>
+      </div>
+    </div>
+  </body>
+</html>

@@ -68,10 +68,11 @@ function createPlayer(playerName, playerMarker) {
         playerName.charAt(0).toUpperCase() + playerName.slice(1).toLowerCase();
     let marker = playerMarker.toUpperCase();
     let myTurn = false;
+    let order;
     const getMarker = () => marker;
     const setTurn = (bool) => (myTurn = bool === true ? true : false);
     const isCurrentPlayer = () => myTurn;
-    let order;
+
     const setOrder = (playerOrder) => (order = playerOrder);
     const getOrder = () => order;
 
@@ -151,35 +152,14 @@ const Display = (() => {
         }
     };
 
-    const player1Ready = (player) => {
-        Game.setPlayer1(player);
-        displayReadyMsg(Game.getPlayer1());
-    };
-
-    const player2Ready = (player) => {
-        Game.setPlayer2(player);
-        displayReadyMsg(Game.getPlayer2());
-    };
-
-    const setPlayerReady = (btn, player) => {
-        btn.classList.contains("p1-ready")
-            ? player1Ready(player)
-            : player2Ready(player);
-    };
-
-    const setPlayerOrder = (player, isPlayer1) => {
-        const playerOrder = isPlayer1 ? 1 : 2;
-        player.setOrder(playerOrder);
-    };
-
     const handleReadyBtn = (btn) => () => {
         const isPlayer1 = btn.classList.contains("p1-ready");
         const nameInput = isPlayer1 ? p1NameInput : p2NameInput;
         const marker = isPlayer1 ? "X" : "O";
         const player = createPlayer(nameInput.value, marker);
 
-        setPlayerOrder(player, isPlayer1);
-        setPlayerReady(btn, player);
+        Game.setPlayerOrder(player, isPlayer1);
+        Game.setPlayerReady(btn, player);
         displayReadyMsg(player, isPlayer1);
 
         if (Game.getPlayer1() && Game.getPlayer2()) Game.startGame();
@@ -223,6 +203,27 @@ const Game = (() => {
             p.isCurrentPlayer() === false ? p.setTurn(true) : p.setTurn(false);
         });
         Display.setGameMessage("playerTurn");
+    };
+
+    const player1Ready = (player) => {
+        setPlayer1(player);
+        Display.displayReadyMsg(getPlayer1());
+    };
+
+    const player2Ready = (player) => {
+        setPlayer2(player);
+        Display.displayReadyMsg(getPlayer2());
+    };
+
+    const setPlayerReady = (btn, player) => {
+        btn.classList.contains("p1-ready")
+            ? player1Ready(player)
+            : player2Ready(player);
+    };
+
+    const setPlayerOrder = (player, isPlayer1) => {
+        const playerOrder = isPlayer1 ? 1 : 2;
+        player.setOrder(playerOrder);
     };
 
     const resetGame = () => {
@@ -283,6 +284,10 @@ const Game = (() => {
         getPlayer2,
         setPlayer1,
         setPlayer2,
+        player1Ready,
+        player2Ready,
+        setPlayerReady,
+        setPlayerOrder,
         startGame,
     };
 })();

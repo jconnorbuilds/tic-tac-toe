@@ -71,17 +71,28 @@ function createPlayer(playerName, playerMarker) {
     const getMarker = () => marker;
     const setTurn = (bool) => (myTurn = bool === true ? true : false);
     const isCurrentPlayer = () => myTurn;
+    let order;
+    const setOrder = (playerOrder) => (order = playerOrder);
+    const getOrder = () => order;
 
     return {
         name,
         isCurrentPlayer,
         setTurn,
         getMarker,
+        setOrder,
+        getOrder,
     };
 }
 
 const Display = (() => {
+    const readyBtns = document.querySelectorAll(".player button.ready");
+    const nameInputs = document.querySelectorAll(".player input.name");
+    const p1NameInput = document.querySelector("input#p1-name");
+    const p2NameInput = document.querySelector("input#p2-name");
     const gameMsg = document.querySelector(".game-messages > p");
+    const p1ReadyBtn = document.querySelector("button.p1-ready");
+    const p2ReadyBtn = document.querySelector("button.p2-ready");
 
     const drawBoard = () => {
         const spaces = document.querySelectorAll(".gameboard .space");
@@ -103,70 +114,35 @@ const Display = (() => {
         gameMsg.textContent = messages[messageKey];
     };
 
-    return {
-        drawBoard,
-        setGameMessage,
+    const setReadyMsgDivs = (player) => {
+        const isPlayer1 = player.getOrder() === 1;
+        const readyMsgSelector = isPlayer1 ? ".p1.is-ready" : ".p2.is-ready";
+        const initMsgSelector = isPlayer1
+            ? ".container-left div.player"
+            : ".container-right div.player";
+
+        return {
+            readyMsgDiv: document.querySelector(readyMsgSelector),
+            initialMsgDiv: document.querySelector(initMsgSelector),
+        };
     };
-})();
 
-const Game = (() => {
-    const p1NameInput = document.querySelector("input#p1-name");
-    const p2NameInput = document.querySelector("input#p2-name");
+    const showReadyMsg = (initMsgDiv, rdyMsgDiv) => {
+        initMsgDiv.classList.remove("hidden");
+        rdyMsgDiv.classList.add("hidden");
+    };
 
-    const p1ReadyBtn = document.querySelector("button.p1-ready");
-    const p2ReadyBtn = document.querySelector("button.p2-ready");
-
-    const boardDisplay = document.querySelector(".gameboard");
-
-    let player1;
-    let player2;
-
-    const readyBtns = document.querySelectorAll(".player button.ready");
-    const nameInputs = document.querySelectorAll(".player input.name");
-
-    const displayReadyMsg = (player) => {
-        let initialMsg;
-        let readyMsg;
-        if (player === player1) {
-            readyMsg = document.querySelector(".p1.is-ready");
-            initialMsg = document.querySelector(".container-left div.player");
-        } else {
-            readyMsg = document.querySelector(".p2.is-ready");
-            initialMsg = document.querySelector(".container-right div.player");
-        }
-
-        readyMsg.querySelector("h2").textContent = `${
+    const setReadyMsgText = (div, player) => {
+        div.querySelector("h2").textContent = `${
             player.name
         } is ${player.getMarker()}`;
-        initialMsg.classList.add("hidden");
-        readyMsg.classList.remove("hidden");
-        console.log(readyMsg.querySelector("h2").textContent);
     };
 
-    readyBtns.forEach((btn) => {
-        btn.addEventListener("click", (e) => {
-            const nameInput = btn.classList.contains("p1-ready")
-                ? p1NameInput
-                : p2NameInput;
-            const marker = btn.classList.contains("p1-ready") ? "X" : "O";
-            const player = createPlayer(nameInput.value, marker);
-            if (btn.classList.contains("p1-ready")) {
-                player1 = player;
-                displayReadyMsg(player1);
-            } else {
-                player2 = player;
-                displayReadyMsg(player2);
-            }
-            if (player1 && player2) startGame();
-        });
-    });
-
-    p1NameInput.addEventListener("input", () =>
-        enableDisableBtn(p1NameInput, p1ReadyBtn)
-    );
-    p2NameInput.addEventListener("input", () =>
-        enableDisableBtn(p2NameInput, p2ReadyBtn)
-    );
+    const displayReadyMsg = (player) => {
+        let { readyMsgDiv, initialMsgDiv } = setReadyMsgDivs(player);
+        setReadyMsgText(readyMsgDiv, player);
+        showReadyMsg(readyMsgDiv, initialMsgDiv);
+    };
 
     const enableDisableBtn = (input, btn) => {
         if (input.value.length >= 3) {
@@ -176,25 +152,46 @@ const Game = (() => {
         }
     };
 
-    const getCurrentPlayer = () => {
-        return player1.isCurrentPlayer() ? player1 : player2;
-    };
+    readyBtns.forEach((btn) => {
+        btn.addEventListener("click", handleReadyBtn(btn));
+    });
 
-    const playersReady = () => {
-        return p1IsReady && p2IsReady;
+    p1NameInput.addEventListener("input", () =>
+        enableDisableBtn(p1NameInput, p1ReadyBtn)
+    );
+    p2NameInput.addEventListener("input", () =>
+        enableDisableBtn(p2NameInput, p2ReadyBtn)
+    );
+
+    return {
+        drawBoard,
+        setGameMessage,
+        displayReadyMsg,
     };
+})();
+
+const Game = (() => {
+    const boardDisplay = document.querySelector(".gameboard");
+
+    let player1;
+    let player2;
+
+    const getPlayer1 = () => player1;
+    const getPlayer2 = () => player2;
+    const setPlayer1 = (player) => (player1 = player);
+    const setPlayer2 = (player) => (player2 = player);
+
+    const getCurrentPlayer = () =>
+        player1.isCurrentPlayer() ? player1 : player2;
 
     const nextPlayer = (players) => {
-        for (const player of players) {
-            player.isCurrentPlayer() === false
-                ? player.setTurn(true)
-                : player.setTurn(false);
-        }
+        players.forEach((p) => {
+            p.isCurrentPlayer() === false ? p.setTurn(true) : p.setTurn(false);
+        });
         Display.setGameMessage("playerTurn");
     };
 
     const getPlayers = () => [player1, player2];
-
     const resetGame = () => {
         if (player1 && player2) {
             player1.setTurn(true);
@@ -205,7 +202,7 @@ const Game = (() => {
         boardDisplay.addEventListener("click", playerTurn);
     };
 
-    const winnerSequence = (player) => {
+    const winnerSequence = () => {
         boardDisplay.removeEventListener("click", playerTurn);
         Display.setGameMessage("displayWinner");
     };
@@ -223,7 +220,7 @@ const Game = (() => {
             if (!GameBoard.hasWinner() && !GameBoard.isFull()) {
                 nextPlayer(getPlayers());
             } else if (GameBoard.hasWinner()) {
-                winnerSequence(move.player);
+                winnerSequence();
             } else if (GameBoard.isFull()) {
                 tieSequence();
             }
@@ -233,10 +230,9 @@ const Game = (() => {
     };
 
     const playerTurn = (e) => {
-        const currentPlayer = getCurrentPlayer();
         if (e.target.classList.contains("space")) {
             const position = e.target.dataset.space;
-            const playerMove = GameBoard.makeMove(currentPlayer, position);
+            const playerMove = GameBoard.makeMove(getCurrentPlayer(), position);
             handleTurnResult(playerMove);
         }
     };
@@ -251,7 +247,10 @@ const Game = (() => {
 
     return {
         getCurrentPlayer,
-        player1,
-        player2,
+        getPlayer1,
+        getPlayer2,
+        setPlayer1,
+        setPlayer2,
+        startGame,
     };
 })();

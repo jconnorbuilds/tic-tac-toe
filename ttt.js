@@ -87,7 +87,6 @@ function createPlayer(playerName, playerMarker) {
 
 const Display = (() => {
     const readyBtns = document.querySelectorAll(".player button.ready");
-    const nameInputs = document.querySelectorAll(".player input.name");
     const p1NameInput = document.querySelector("input#p1-name");
     const p2NameInput = document.querySelector("input#p2-name");
     const gameMsg = document.querySelector(".game-messages > p");
@@ -157,18 +156,16 @@ const Display = (() => {
         displayReadyMsg(Game.getPlayer1());
     };
 
-    function player2Ready(player) {
+    const player2Ready = (player) => {
         Game.setPlayer2(player);
         displayReadyMsg(Game.getPlayer2());
-    }
+    };
 
-    function setPlayerReady(btn, player) {
+    const setPlayerReady = (btn, player) => {
         btn.classList.contains("p1-ready")
             ? player1Ready(player)
             : player2Ready(player);
-        console.log(Game.getPlayer1());
-        console.log(Game.getPlayer2());
-    }
+    };
 
     const setPlayerOrder = (player, isPlayer1) => {
         const playerOrder = isPlayer1 ? 1 : 2;
@@ -177,11 +174,9 @@ const Display = (() => {
 
     const handleReadyBtn = (btn) => () => {
         const isPlayer1 = btn.classList.contains("p1-ready");
-        console.log({ isPlayer1 });
         const nameInput = isPlayer1 ? p1NameInput : p2NameInput;
         const marker = isPlayer1 ? "X" : "O";
         const player = createPlayer(nameInput.value, marker);
-        console.log({ player });
 
         setPlayerOrder(player, isPlayer1);
         setPlayerReady(btn, player);
@@ -216,14 +211,9 @@ const Game = (() => {
 
     const getPlayer1 = () => player1;
     const getPlayer2 = () => player2;
-    const setPlayer1 = (player) => {
-        console.log("setp1 has been called");
-        player1 = player;
-    };
-    const setPlayer2 = (player) => {
-        console.log("setp2 has been called");
-        player2 = player;
-    };
+    const setPlayer1 = (player) => (player1 = player);
+    const setPlayer2 = (player) => (player2 = player);
+    const getPlayers = () => [player1, player2];
 
     const getCurrentPlayer = () =>
         player1.isCurrentPlayer() ? player1 : player2;
@@ -235,7 +225,6 @@ const Game = (() => {
         Display.setGameMessage("playerTurn");
     };
 
-    const getPlayers = () => [player1, player2];
     const resetGame = () => {
         if (player1 && player2) {
             player1.setTurn(true);
@@ -282,8 +271,6 @@ const Game = (() => {
     };
 
     const startGame = () => {
-        console.log({ player1 });
-        console.log({ player2 });
         GameBoard.reset();
         player1.setTurn(true);
         boardDisplay.addEventListener("click", playerTurn);

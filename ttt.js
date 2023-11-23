@@ -152,6 +152,44 @@ const Display = (() => {
         }
     };
 
+    const player1Ready = (player) => {
+        Game.setPlayer1(player);
+        displayReadyMsg(Game.getPlayer1());
+    };
+
+    function player2Ready(player) {
+        Game.setPlayer2(player);
+        displayReadyMsg(Game.getPlayer2());
+    }
+
+    function setPlayerReady(btn, player) {
+        btn.classList.contains("p1-ready")
+            ? player1Ready(player)
+            : player2Ready(player);
+        console.log(Game.getPlayer1());
+        console.log(Game.getPlayer2());
+    }
+
+    const setPlayerOrder = (player, isPlayer1) => {
+        const playerOrder = isPlayer1 ? 1 : 2;
+        player.setOrder(playerOrder);
+    };
+
+    const handleReadyBtn = (btn) => () => {
+        const isPlayer1 = btn.classList.contains("p1-ready");
+        console.log({ isPlayer1 });
+        const nameInput = isPlayer1 ? p1NameInput : p2NameInput;
+        const marker = isPlayer1 ? "X" : "O";
+        const player = createPlayer(nameInput.value, marker);
+        console.log({ player });
+
+        setPlayerOrder(player, isPlayer1);
+        setPlayerReady(btn, player);
+        displayReadyMsg(player, isPlayer1);
+
+        if (Game.getPlayer1() && Game.getPlayer2()) Game.startGame();
+    };
+
     readyBtns.forEach((btn) => {
         btn.addEventListener("click", handleReadyBtn(btn));
     });
@@ -178,8 +216,14 @@ const Game = (() => {
 
     const getPlayer1 = () => player1;
     const getPlayer2 = () => player2;
-    const setPlayer1 = (player) => (player1 = player);
-    const setPlayer2 = (player) => (player2 = player);
+    const setPlayer1 = (player) => {
+        console.log("setp1 has been called");
+        player1 = player;
+    };
+    const setPlayer2 = (player) => {
+        console.log("setp2 has been called");
+        player2 = player;
+    };
 
     const getCurrentPlayer = () =>
         player1.isCurrentPlayer() ? player1 : player2;
@@ -238,11 +282,12 @@ const Game = (() => {
     };
 
     const startGame = () => {
+        console.log({ player1 });
+        console.log({ player2 });
         GameBoard.reset();
         player1.setTurn(true);
         boardDisplay.addEventListener("click", playerTurn);
         Display.setGameMessage("playerTurn");
-        console.log("playing");
     };
 
     return {
